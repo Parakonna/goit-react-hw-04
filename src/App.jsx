@@ -64,10 +64,9 @@ const App = () => {
   };
 
   const handleClick = () => {
-    if (moreImages) {
       setPage(prevPage => prevPage + 1);
-    }
   };
+  
   useEffect(() => {
     return () => {
       document.body.style.overflow = 'auto';
@@ -107,7 +106,7 @@ const App = () => {
           selectedImg={modalImg}
         />
       )}
-      {!loading && moreImages && <LoadMoreBtn onClick={handleClick} />}
+      {!loading && articles.length > 0 && <LoadMoreBtn onClick={handleClick} />}
     </>
   );
 }
