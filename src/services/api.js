@@ -6,16 +6,13 @@ const BASE_URL = 'https://api.unsplash.com/search/photos';
 export const fetchPhotos = async (query, page = 1, perPage = 12) => {
     const response = await axios.get( BASE_URL, {
         params: {
-            query,
+           query,
             page,
             per_page: perPage,
-        },
-            headers: {
-        Authorization: `Client-ID ${API_KEY}`
+            client_id: API_KEY,
       }
         },
     )
-   
     return response.data.results;
 }
 

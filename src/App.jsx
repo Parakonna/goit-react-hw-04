@@ -12,10 +12,10 @@ import ErrorMessage from "./components/ErrorMessage/ErrorMessage";
 import { toast, Toaster } from 'react-hot-toast';
 
 const App = () => {
-  const [articles, setArticles] = useState(null);
+  const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [searchValue, setSearchValue] = useState("");
+  const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   
   const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -24,17 +24,18 @@ const App = () => {
   
   
   useEffect(() => {
-    if (searchValue === null) return;
+    if (!query) return;
     async function fetchPhotosBySearchValue() {
       try {
         setLoading(true);
-        const data = await fetchPhotos(`query=${searchValue}&page=${page}`);
-        
+        const data = await fetchPhotos(query,page);
+        console.log(data); 
         if (page !== 1) {
-          setArticles((prevState) => [...prevState, ...data.results]);
-          setMoreImages(data.results.length >= 16);
-        } else { setArticles(data.results); }
-        
+          setArticles(prevState => [...prevState, ...data]);
+          setMoreImages(data.results.length >= 11);
+        } else {
+          setArticles(data); 
+        }
       } catch (error) {
         setError(error.message);
       } finally {
@@ -42,7 +43,7 @@ const App = () => {
       }
     }
     fetchPhotosBySearchValue();
-  }, [searchValue, page])
+  }, [query, page])
   
   const openModal = article => {
     console.log('Image object:', article);
@@ -81,9 +82,9 @@ const App = () => {
       toast.error('Enter a search word!');
       return;
     }
-    setSearchValue(searchTerm);
+    setQuery(searchTerm);
     setPage(1);
-    articles([]);
+    setArticles([]);
     form.reset();
   };
     
