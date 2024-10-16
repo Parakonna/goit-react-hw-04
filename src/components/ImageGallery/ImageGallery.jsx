@@ -1,15 +1,15 @@
-//import ImageCard from "../ImageCard/ImageCard"
+import ImageCard from "../ImageCard/ImageCard"
 
 
-//const ImageGallery = ({articles}) => {
-//  return (
- //     <ul>{articles.map((artikle) => {
-  //      return (<li key={artikle.id}>
-//		<ImageCard />
-//	</li>)
-//    })}		
-//</ul>
-// )
-//}
+const ImageGallery = ({articles, onClick}) => {
+  return (
+     <ul>{articles !== null && articles.map((artikle) => {
+       return (<li key={artikle.id}>
+           <ImageCard image={artikle} onClick={() => onClick(artikle)} />
+	</li>)
+    })}		
+</ul>
+)
+}
 
-////export default ImageGallery
+export default ImageGallery

@@ -1,46 +1,114 @@
 
 import { useEffect, useState } from "react";
-import SearchBar from "./components/SearchBar/SearchBar";
 import { fetchPhotos } from "../src/services/api"
 import { InfinitySpin } from "react-loader-spinner";
 
-//import ImageGallery from "./components/ImageGallery/ImageGallery";
+import SearchBar from "./components/SearchBar/SearchBar";
+import ImageGallery from "./components/ImageGallery/ImageGallery";
+import ImageModal from "./components/ImageModal/ImageModal";
+import LoadMoreBtn from "./components/LoadMoreBtn/LoadMoreBtn";
+import ErrorMessage from "./components/ErrorMessage/ErrorMessage";
 
+import { toast, Toaster } from 'react-hot-toast';
 
 const App = () => {
   const [articles, setArticles] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  // const [page, setPage] = useState(1);
-
-  console.log(articles);
+  const [searchValue, setSearchValue] = useState("");
+  const [page, setPage] = useState(1);
+  
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [modalImg, setModalImg] = useState(null);
+  const [moreImages, setMoreImages] = useState(false);
+  
   
   useEffect(() => {
-    async function fetchPhotos() {
+    if (searchValue === null) return;
+    async function fetchPhotosBySearchValue() {
       try {
         setLoading(true);
-        const data = await fetchPhotos("react");
-        setArticles(data);
-        console.log(Object.data);
+        const data = await fetchPhotos(`query=${searchValue}&page=${page}`);
+        
+        if (page !== 1) {
+          setArticles((prevState) => [...prevState, ...data.results]);
+          setMoreImages(data.results.length >= 16);
+        } else { setArticles(data.results); }
+        
       } catch (error) {
-        setError(error.message); 
+        setError(error.message);
       } finally {
         setLoading(false);
       }
     }
-    fetchPhotos();
-  }, [])
+    fetchPhotosBySearchValue();
+  }, [searchValue, page])
   
+  const openModal = article => {
+    console.log('Image object:', article);
+    setModalImg({
+      url: article.urls.regular,
+      description: article.description,
+      likes: article.likes,
+      author: article.user.name,
+    });
+    setModalIsOpen(true);
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeModal = () => {
+    setModalIsOpen(false);
+    setModalImg(null);
+    document.body.style.overflow = 'auto';
+  };
+
+  const handleClick = () => {
+    if (moreImages) {
+      setPage(prevPage => prevPage + 1);
+    }
+  };
+  useEffect(() => {
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, []);
+
+  const handleSubmit = (ev) => {
+    ev.preventDefault();
+    const form = ev.currentTarget;
+    const searchTerm = form.elements.input.value.trim('');
+    if (searchTerm === '') {
+      toast.error('Enter a search word!');
+      return;
+    }
+    setSearchValue(searchTerm);
+    setPage(1);
+    articles([]);
+    form.reset();
+  };
+    
+
   return (
     <>
-     <SearchBar onSubmit={fetchPhotos}/> 
-     {loading && (<InfinitySpin />)}
-     {error && (<p>Error:&quot;{error}&quot</p>)}
-  
-</>
-);
-};
+      <div><SearchBar onSubmit={handleSubmit} />
+        <Toaster position="top-right" />
+      </div>
+      
+      {loading && (
+        <div><InfinitySpin /></div>)}
+      {error && (<p>Error:&quot;{error}&quot</p>)}
+     <ImageGallery articles={articles} onClick={openModal} />
+      {error && <ErrorMessage />}
+      {modalIsOpen && (
+        <ImageModal
+          modalIsOpen={modalIsOpen}
+          closeModal={closeModal}
+          selectedImg={modalImg}
+        />
+      )}
+      {!loading && moreImages && <LoadMoreBtn onClick={handleClick} />}
+    </>
+  );
+}
 
 export default App
-
- //{articles !== null && (<ImageGallery articles={articles} />)}
