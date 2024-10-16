@@ -20,7 +20,7 @@ const App = () => {
   
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [modalImg, setModalImg] = useState(null);
-  const [moreImages, setMoreImages] = useState(false);
+
   
   
   useEffect(() => {
@@ -32,7 +32,6 @@ const App = () => {
         console.log(data); 
         if (page !== 1) {
           setArticles(prevState => [...prevState, ...data]);
-          setMoreImages(data.results.length >= 11);
         } else {
           setArticles(data); 
         }
